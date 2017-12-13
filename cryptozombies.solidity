@@ -1,0 +1,56 @@
+// first solidity project. Cryptozombies.io
+// at: https://cryptozombies.io/
+pragma solidity ^0.4.19;
+
+contract ZombieFactory {
+//Events are a way for your contract to communicate
+// that something happened on the blockchain to your
+// app front-end, which can be 'listening' for
+// certain events and take action when they happen.
+
+event NewZombie(uint zombieId, string name, uint dna);
+
+  // State variable.
+  // It will be stored permanently on the blockchain
+  uint256 dnaDigits = 16;
+  // uint is an alias for uint256
+  uint dnaModulus = 10 ** dnaDigits;
+
+  // structs
+  struct Zombie {
+        string name;
+        uint dna;
+    }
+
+  // arrays.
+  // public let other contracts free to
+  // write into this array
+  Zombie[] public zombies;
+
+  // functions
+  // this function is private (note tha naming convention also)
+  // in this way, it can only be accessed by this contract
+  function _createZombie(string _name, uint _dna) private {
+          uint id = zombies.push(Zombie(_name, _dna));
+          // and fire it here
+          NewZombie(id, _name, _dna);
+
+    }
+
+  // functions that only access data (without writing to it)
+  // are marked as 'view'.
+  // you declare the type returned with 'returns (type)'
+    function _generateRandomDna(string _str) private view returns (uint) {
+        // kekkak256() is a SHA3 function
+        uint rand = uint(keccak256(_str));
+        // we want a result which is 16 digits long,
+        // so we take the modulus of the hash
+        return rand % dnaModulus;
+      }
+
+    function createRandomZombie(string _name) public {
+          uint randDna = _generateRandomDna(_name);
+          _createZombie(_name, randDna);
+      }
+
+}
